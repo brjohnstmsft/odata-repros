@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using System.Web.Http.Routing;
 using System.Web.Http.SelfHost;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -62,6 +65,30 @@ namespace ODataAndCorsClassic
         public int DoSomething() => 0;
     }
 
+    public class WorkaroundHandler : DelegatingHandler
+    {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Console.WriteLine("Running workaround...");
+            EnsureRouteData(request);
+            return await base.SendAsync(request, cancellationToken);
+        }
+
+        private static void EnsureRouteData(HttpRequestMessage request)
+        {
+            IHttpRouteData routeData = request.GetRouteData();
+            if (routeData == null)
+            {
+                HttpConfiguration config = request.GetConfiguration();
+
+                if (config != null)
+                {
+                    config.Routes.GetRouteData(request);
+                }
+            }
+        }
+    }
+
     public static class Startup
     {
         public static void Configure(HttpConfiguration httpConfig)
@@ -72,6 +99,7 @@ namespace ODataAndCorsClassic
             httpConfig.MapODataServiceRoute("odata", "odata", model);
             httpConfig.EnableDependencyInjection();
             httpConfig.EnableCors();
+            httpConfig.MessageHandlers.Insert(0, new WorkaroundHandler());  // Must be before the CORS handler.
         }
 
         private static IEdmModel BuildModel()
