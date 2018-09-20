@@ -12,6 +12,8 @@ using System.Web.Http.SelfHost;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -93,11 +95,29 @@ namespace ODataAndCorsClassic
     {
         public static void Configure(HttpConfiguration httpConfig)
         {
+            const string RoutePrefix = "odata";
+            const string RouteName = "odata";
+
             IEdmModel model = BuildModel();
             httpConfig.Routes.MapHttpRoute("ping", "ping", new { controller = "Ping", action = "Get" });
             httpConfig.Routes.MapHttpRoute("dosomething", "ping/do", new { controller = "Ping", action = "DoSomething" });
-            httpConfig.MapODataServiceRoute("odata", "odata", model);
+            httpConfig.MapODataServiceRoute(RouteName, RoutePrefix, model);
             httpConfig.EnableDependencyInjection();
+
+            // Since route constraints can't be injected using DI, we create a new ODataRoute manually with routeConstraints.
+            // This is a limitation of Web API OData 7.0 that should be fixed eventually.
+            var odataRoute =
+                new ODataRoute(
+                   RoutePrefix,
+                   new CustomODataPathRouteConstraint(RouteName),
+                   defaults: null,
+                   constraints: null,
+                   dataTokens: null,
+                   handler: null);
+
+            httpConfig.Routes.Remove(RouteName);
+            httpConfig.Routes.Add(RouteName, odataRoute);
+
             httpConfig.EnableCors();
             httpConfig.MessageHandlers.Insert(0, new WorkaroundHandler());  // Must be before the CORS handler.
         }
