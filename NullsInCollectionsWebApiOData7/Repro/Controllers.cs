@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
-using System.Web.OData;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 
 namespace Repro
@@ -21,7 +21,7 @@ namespace Repro
         [HttpGet]
         public EdmEntityObjectCollection Get()
         {
-            IEdmModel model = Request.ODataProperties().Model;
+            IEdmModel model = Request.GetModel();
             IEdmCollectionTypeReference collectionType = model.GetDocEntityCollectionTypeRef();
             return new EdmEntityObjectCollection(collectionType, Documents);
         }
@@ -29,7 +29,7 @@ namespace Repro
         [HttpPost]
         public void Index([FromBody] ODataUntypedActionParameters parameters)
         {
-            IEdmModel model = Request.ODataProperties().Model;
+            IEdmModel model = Request.GetModel();
             IEdmEntityTypeReference docTypeRef = model.GetDocTypeRef();
             IEdmEntityType docType = docTypeRef.EntityDefinition();
 

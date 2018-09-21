@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Web.OData.Builder;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace Repro
 {

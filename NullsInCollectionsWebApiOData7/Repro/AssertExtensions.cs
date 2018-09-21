@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 
@@ -46,5 +47,27 @@ namespace Repro
             Assert.IsTrue(
                 JToken.DeepEquals(expected, actual),
                 $"Expected JSON to match. Expected: <{expected}>\nActual: <{actual}> {message}");
+
+        public static void AssertXmlEquals(
+            this string actualXml,
+            string expectedXml,
+            string message,
+            params string[] parameters)
+        {
+            bool NormalizeAndCompare(XElement left, XElement right)
+            {
+                left = left.Normalize();
+                right = right.Normalize();
+
+                return XNode.DeepEquals(left, right);
+            }
+
+            var actual = XElement.Parse(actualXml);
+            var expected = XElement.Parse(expectedXml);
+            if (!NormalizeAndCompare(expected, actual))
+            {
+                Assert.Fail(message, parameters);
+            }
+        }
     }
 }

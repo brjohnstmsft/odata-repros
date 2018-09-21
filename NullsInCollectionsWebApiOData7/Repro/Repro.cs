@@ -1,9 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using System.Web.Http.SelfHost;
-using System.Web.OData;
 using Microsoft.OData.Edm;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -415,7 +410,7 @@ namespace Repro
 
             string response = Get("odata/$metadata").GetContent();
 
-            Assert.AreEqual(ExpectedEdmModel, response);
+            response.AssertXmlEquals(ExpectedEdmModel, "EDM model shouldn't differ from baseline.");
         }
     }
 }
