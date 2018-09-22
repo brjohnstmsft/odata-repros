@@ -1,5 +1,5 @@
 using System.Web.Http;
-using System.Web.OData;
+using Microsoft.AspNet.OData;
 
 namespace Repro
 {

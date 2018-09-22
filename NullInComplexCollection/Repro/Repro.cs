@@ -26,6 +26,7 @@ namespace Repro
                 "A null value was found with the expected type 'search.address[Nullable=False]'. The expected type " +
                 "'search.address[Nullable=False]' does not allow null values.";
 
+            // FAILS by returning 200 (OK) instead of 400 (BadRequest), even though the complex type is non-nullable.
             Post("odata/Docs", Json)
                 .AssertBadRequest()
                 .AssertContains(ExpectedError);
