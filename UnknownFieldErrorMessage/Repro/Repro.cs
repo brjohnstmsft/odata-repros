@@ -5,6 +5,7 @@ namespace Repro
     [TestClass]
     public sealed class Repro : TestBase
     {
+        // Fixed in Microsoft.AspNet.OData 7.1.0
         [TestMethod]
         public void UnknownFieldsOnNonOpenEntityTypeDisallowed()
         {
@@ -24,6 +25,7 @@ namespace Repro
                 .AssertContains(ExpectedError);
         }
 
+        // Fixed in Microsoft.ASpNet.OData 7.1.0
         [TestMethod]
         public void UnknownFieldsOnNonOpenComplexTypeDisallowed()
         {
