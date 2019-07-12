@@ -1,10 +1,14 @@
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.OData.Edm;
 
 namespace Repro
 {
@@ -12,8 +16,19 @@ namespace Repro
     {
         public static void Configure(HttpConfiguration httpConfig)
         {
-            IEdmModel model = Model.BuildModel();
-            httpConfig.MapODataServiceRoute("odata", "odata", model);
+            IEdmModel model = StaticModel.BuildModel();
+            DynamicModel.AddToModel(model);
+            httpConfig.MapODataServiceRoute("odata", "odata", builder =>
+            {
+                var odataMessageReaderSettings = new ODataMessageReaderSettings { ReadUntypedAsString = false };
+
+                builder
+                    .AddServicePrototype(odataMessageReaderSettings)
+                    .AddService(ServiceLifetime.Singleton, sp => model)
+                    .AddService<IODataPathHandler>(ServiceLifetime.Singleton, sp => new DefaultODataPathHandler())
+                    .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp => ODataRoutingConventions.CreateDefault());
+            });
+
             httpConfig.Filters.Add(new ActionArgumentValidationAttribute());
         }
 

@@ -18,9 +18,23 @@ namespace Repro
         public string Name { get; set; }
 
         public IList<Field> Fields { get; set; }
+
+        public List<Analyzer> Analyzers { get; set; }
     }
 
-    public static class Model
+    public abstract class Analyzer
+    {
+        public string Name { get; set; }
+    }
+
+    public sealed class CustomAnalyzer : Analyzer
+    {
+        public string TokenizerName { get; set; }
+
+        public string[] TokenFilters { get; set; }
+    }
+
+    public static class StaticModel
     {
         public static IEdmModel BuildModel()
         {

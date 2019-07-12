@@ -36,6 +36,13 @@ namespace Repro
             _server?.CloseAsync().Wait();
         }
 
+        protected HttpResponseMessage Get(string url)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, MakeRelative(url));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptNoMetadata));
+            return _client.SendAsync(request).Result;
+        }
+
         protected HttpResponseMessage Post(string url, string json)
         {
             var request =
